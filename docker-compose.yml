@@ -1,0 +1,42 @@
+version: '3'
+
+networks:
+    LEMP:
+
+services:
+    nginx:
+        image: nginx:stable-alpine
+        ports:
+            - "8081:80"
+        volumes:
+            - ./www-auth:/var/www/html
+            - ./www-business:/var/www/html2
+            - ./nginx/vhost1.conf:/etc/nginx/conf.d/vhost1.conf
+            - ./nginx/vhost2.conf:/etc/nginx/conf.d/vhost2.conf
+        depends_on:
+            - php
+        networks:
+            - LEMP
+
+    mysql:
+        image: mysql:latest
+        volumes:
+            - ./database:/var/lib/mysql:rw
+        ports:
+            - "3306:3306"
+        depends_on:
+            - nginx
+        environment:
+            - MYSQL_ROOT_PASSWORD=root          
+        networks:
+            - LEMP    
+
+    php:
+        image: webdevops/php:7.3
+        volumes:
+            - ./www-auth:/var/www/html
+            - ./www-business:/var/www/html2
+        ports:
+            - "9000:9000"       
+        networks:
+            - LEMP
